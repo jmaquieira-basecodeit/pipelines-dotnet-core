@@ -9,7 +9,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 variables:
   buildConfiguration: 'Release'
@@ -22,4 +22,4 @@ steps:
   inputs:
     command: 'test'
     projects: '**/*test/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
+    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
