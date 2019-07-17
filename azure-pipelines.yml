@@ -9,7 +9,8 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'windows-latest'
+  # vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
   buildConfiguration: 'Release'
@@ -22,4 +23,12 @@ steps:
   inputs:
     command: 'test'
     projects: '**/*test/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+    # arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
