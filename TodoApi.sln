@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pipelines-dotnet-core-web-api", "pipelines-dotnet-core-web-api\pipelines-dotnet-core-web-api.csproj", "{72BC285B-357C-429B-979C-8635C5B12FE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoApi", "TodoApi\TodoApi.csproj", "{72BC285B-357C-429B-979C-8635C5B12FE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pipelines-dotnet-core-test", "pipelines-dotnet-core-test\pipelines-dotnet-core-test.csproj", "{C98C9F96-B324-4959-A7DC-13B2C2B6D0B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoApi.Tests", "TodoApi.Tests\TodoApi.Tests.csproj", "{C98C9F96-B324-4959-A7DC-13B2C2B6D0B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
