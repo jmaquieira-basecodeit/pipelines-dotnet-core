@@ -8,9 +8,6 @@ using TodoApi.Controllers;
 using TodoApi.Models;
 using System.Linq;
 using Moq;
-using System.Linq.Expressions;
-using System.Threading;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace TodoApi.Tests
 {
@@ -55,94 +52,71 @@ namespace TodoApi.Tests
             // Assert
             Assert.IsType<ActionResult<IEnumerable<TodoItem>>>(result);
         }
-    }
 
-    public class MockAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
-    {
-        public MockAsyncEnumerable(IEnumerable<T> enumerable)
-            : base(enumerable)
-        { }
-
-        public MockAsyncEnumerable(Expression expression)
-            : base(expression)
-        { }
-
-        public IAsyncEnumerator<T> GetEnumerator()
+        [Fact]
+        public async Task GetTodoItemNotFound()
         {
-            return new MockAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
+            // Arrange
+            var mockTodoItems = new Mock<DbSet<TodoItem>>();
+            mockTodoItems.As<IAsyncEnumerable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(new MockAsyncEnumerator<TodoItem>(_todoItems.GetEnumerator()));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Provider).Returns(new MockAsyncQueryProvider<TodoItem>(_todoItems.Provider));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Expression).Returns(_todoItems.Expression);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.ElementType).Returns(_todoItems.ElementType);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(_todoItems.GetEnumerator());
+
+            var mockTodoContext = new Mock<TodoContext>();
+            mockTodoContext.Setup(todoContext => todoContext.TodoItems).Returns(mockTodoItems.Object);
+            var controller = new TodoController(mockTodoContext.Object);
+
+            // Act
+            var result = await controller.Get(null);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result.Result);
         }
 
-        IQueryProvider IQueryable.Provider
+        [Fact]
+        public async Task GetTodoItemSuccess()
         {
-            get { return new MockAsyncQueryProvider<T>(this); }
-        }
-    }
+            // Arrange
+            var mockTodoItems = new Mock<DbSet<TodoItem>>();
+            mockTodoItems.As<IAsyncEnumerable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(new MockAsyncEnumerator<TodoItem>(_todoItems.GetEnumerator()));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Provider).Returns(new MockAsyncQueryProvider<TodoItem>(_todoItems.Provider));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Expression).Returns(_todoItems.Expression);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.ElementType).Returns(_todoItems.ElementType);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(_todoItems.GetEnumerator());
 
-    public class MockAsyncEnumerator<T> : IAsyncEnumerator<T>
-    {
-        private readonly IEnumerator<T> _inner;
+            var mockTodoContext = new Mock<TodoContext>();
+            mockTodoContext.Setup(todoContext => todoContext.TodoItems).Returns(mockTodoItems.Object);
+            var controller = new TodoController(mockTodoContext.Object);
 
-        public MockAsyncEnumerator(IEnumerator<T> inner)
-        {
-            _inner = inner;
-        }
+            // Act
+            var result = await controller.Get(1050);
 
-        public void Dispose()
-        {
-            _inner.Dispose();
-        }
-
-        public T Current
-        {
-            get
-            {
-                return _inner.Current;
-            }
+            // Assert
+            Assert.IsType<ActionResult<TodoItem>>(result);
         }
 
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
+        [Fact]
+        public async Task GetTodoItem666NotFound()
         {
-            return Task.FromResult(_inner.MoveNext());
-        }
-    }
+            // Arrange
+            var mockTodoItems = new Mock<DbSet<TodoItem>>();
+            mockTodoItems.As<IAsyncEnumerable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(new MockAsyncEnumerator<TodoItem>(_todoItems.GetEnumerator()));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Provider).Returns(new MockAsyncQueryProvider<TodoItem>(_todoItems.Provider));
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.Expression).Returns(_todoItems.Expression);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.ElementType).Returns(_todoItems.ElementType);
+            mockTodoItems.As<IQueryable<TodoItem>>().Setup(m => m.GetEnumerator()).Returns(_todoItems.GetEnumerator());
 
-    public class MockAsyncQueryProvider<TEntity> : IAsyncQueryProvider
-    {
-        private readonly IQueryProvider _inner;
+            var mockTodoContext = new Mock<TodoContext>();
+            mockTodoContext.Setup(todoContext => todoContext.TodoItems).Returns(mockTodoItems.Object);
+            var controller = new TodoController(mockTodoContext.Object);
 
-        public MockAsyncQueryProvider(IQueryProvider inner)
-        {
-            _inner = inner;
-        }
+            // Act
+            var result = await controller.Get(666);
 
-        public IQueryable CreateQuery(Expression expression)
-        {
-            return new MockAsyncEnumerable<TEntity>(expression);
-        }
-
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-        {
-            return new MockAsyncEnumerable<TElement>(expression);
-        }
-
-        public object Execute(Expression expression)
-        {
-            return _inner.Execute(expression);
-        }
-
-        public TResult Execute<TResult>(Expression expression)
-        {
-            return _inner.Execute<TResult>(expression);
-        }
-
-        public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
-        {
-            return new MockAsyncEnumerable<TResult>(expression);
-        }
-
-        public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Execute<TResult>(expression));
+            // Assert
+            Assert.IsType<NotFoundResult>(result.Result);
         }
     }
 }

@@ -23,14 +23,19 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> Get()
         {
-            return await _context.TodoItems.ToListAsync();
+            return await _context.TodoItems.AsNoTracking().ToListAsync();
         }
 
         // GET api/todo/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> Get(int id)
+        public async Task<ActionResult<TodoItem>> Get(int? id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var todoItem = await _context.TodoItems.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
 
             if (todoItem == null)
             {
@@ -42,8 +47,25 @@ namespace TodoApi.Controllers
 
         // POST api/todo
         [HttpPost]
-        public void Post([FromBody] string value)
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult<TodoItem>> Post([Bind("Name")] TodoItem todoItem)
         {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _context.Add(todoItem);
+                    await _context.SaveChangesAsync();
+                    return todoItem;
+                }
+            }
+            catch //(DbUpdateException ex)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+            }
+            return todoItem;
         }
 
         // PUT api/todo/5
